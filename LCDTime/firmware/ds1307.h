@@ -11,59 +11,57 @@
 #define MONTH 0x05
 #define YEAR  0x06
 
-void delay_ds1307(unsigned int t){
-	while(t--);
-}
+extern void delay_us(unsigned int t);
 
 // For I2C
 
 void I2C_start(void){
-	SCL=1;	
-	SCL=0;
-	SDA=1;
-	SCL=1;
-	delay_ds1307(2);
-	SDA=0;
-	delay_ds1307(2);
-	SCL=0;
-	delay_ds1307(2);	
+	SCL = 1;	
+	SCL = 0;
+	SDA = 1;
+	SCL = 1;
+	delay_us(2);
+	SDA = 0;
+	delay_us(2);
+	SCL = 0;
+	delay_us(2);	
 }
 
 void I2C_stop(void){
-	SCL=1;
-	SCL=0;
-	SDA=0;
-	delay_ds1307(2);
-	SCL=1;
-	delay_ds1307(2);
-	SDA=1;
+	SCL = 1;
+	SCL = 0;
+	SDA = 0;
+	delay_us(2);
+	SCL = 1;
+	delay_us(2);
+	SDA = 1;
 }
 
 bit I2C_write(unsigned char dat){
 	int i;
-	for(i=0;i<8;i++){
-		SDA=(dat & 0x80)?1:0;
-		SCL=1;
-		SCL=0;
-		dat<<=1;
+	for(i = 0; i < 8; i++){
+		SDA = (dat & 0x80) ? 1 : 0;
+		SCL = 1;
+		SCL = 0;
+		dat <<= 1;
 	}
-	SCL=1;
-	delay_ds1307(2);
-	SCL=0;
+	SCL = 1;
+	delay_us(2);
+	SCL = 0;
 }
 
 unsigned char I2C_read(void){
 	bit read;
-	unsigned char i,dat;
-	dat=0x00;
-	for(i=0;i<8;i++){	// vong lap doc 1 Byte
-		delay_ds1307(2);
-		SCL=1;			// dat SCL
-		delay_ds1307(2);
-		read=SDA;	  	// lay bit tu SDA
-		dat<<=1;
-		dat|=read;		// Luu bit vao dat
-		SCL=0; 			// xoa sach SCL
+	unsigned char i, dat;
+	dat = 0x00;
+	for(i = 0; i < 8; i++){	// vong lap doc 1 Byte
+		delay_us(2);
+		SCL = 1;			// dat SCL
+		delay_us(2);
+		read = SDA;	  	// lay bit tu SDA
+		dat <<= 1;
+		dat |= read;		// Luu bit vao dat
+		SCL = 0; 			// xoa sach SCL
 	}
 	return dat;
 }
@@ -71,25 +69,25 @@ unsigned char I2C_read(void){
 // For DS1307
 
 unsigned char DS1307_get(unsigned char addr){
-	unsigned int tmp,ret;
+	unsigned int tmp, ret;
 	I2C_start();  			// khoi tao I2C bus
 	I2C_write(DS1307_ID);	// ket noi voi DS1307
 	I2C_write(addr);
 	I2C_start();
-	I2C_write(DS1307_ID+1);
+	I2C_write(DS1307_ID + 1);
 	ret=I2C_read();
 	I2C_stop();
 	//------------------------------------------
-	tmp=ret;
-	ret=(((ret/16)*10)+ (tmp & 0x0f)); 	// BCD to HEX
+	tmp = ret;
+	ret = (((ret >> 4) * 10) + (tmp & 0x0f)); 	// BCD to HEX
 	return ret;
 }
 
 void DS1307_write(unsigned char addr, unsigned char dat){
 	unsigned int tmp;
 	//-------------------------------------------
-	tmp=dat;
-	dat=(((dat/10)*16)|(tmp %10));		// HEX to BCD
+	tmp = dat;
+	dat = (((dat / 10) << 4) | (tmp % 10));		// HEX to BCD
 	//-------------------------------------------
 	I2C_start();
 	I2C_write(DS1307_ID);

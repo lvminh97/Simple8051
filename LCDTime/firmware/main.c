@@ -10,8 +10,7 @@
 #define MIN_A  0x08
 #define HOUR_A 0x09
 
-unsigned char hour, hour12, min, sec, date, mon, year;
-char apm[3] = "";
+unsigned char hour, min, sec, date, mon, year;
 unsigned char hour_alarm, min_alarm;
 unsigned char adjust = 0;
 
@@ -76,13 +75,12 @@ void fixAlarm(){
 
 void dispHMS(unsigned char x, unsigned char y){
 	lcd_gotoxy(x,y);
-	lcd_putnum(hour12);
+	lcd_putnum(hour);
 	lcd_putchar(':');
 	lcd_putnum(min);
 	lcd_putchar(':');
 	lcd_putnum(sec);
 	lcd_putchar(' ');
-	lcd_putsf(apm);
 	lcd_putsf("     ");
 }
 void dispDMY(unsigned char x, unsigned char y){
@@ -133,7 +131,7 @@ void keypad(){
 			lcd_putsf("Set alarm: hour");
 		else if(adjust == 8)
 			lcd_putsf("Set alarm: min ");
-		delay(100);
+		delay(200);
 	}	
 	else if(UP == 0 && adjust){
 		UP = 1;
@@ -149,7 +147,8 @@ void keypad(){
 		else if(adjust == 7) hour_alarm++;
 		else if(adjust == 8) min_alarm++;
 		// Fix value
-		fixTime(); fixAlarm();
+		fixTime(); 
+		fixAlarm();
 		// Write data to DS1307
 		DS1307_write(SEC, sec);	
 		DS1307_write(MIN, min);
@@ -159,7 +158,7 @@ void keypad(){
 		DS1307_write(YEAR, year);
 		DS1307_write(MIN_A, min_alarm);
 		DS1307_write(HOUR_A, hour_alarm);
-		delay(100);
+		delay(200);
 	}
 	else if(DOWN == 0 && adjust){
 		DOWN = 1;
@@ -175,7 +174,8 @@ void keypad(){
 		else if(adjust == 7) hour_alarm--;
 		else if(adjust == 8) min_alarm--;
 		// Fix value
-		fixTime(); fixAlarm();
+		fixTime(); 
+		fixAlarm();
 		// Write data to DS1307
 		DS1307_write(SEC, sec);	
 		DS1307_write(MIN, min);
@@ -185,7 +185,7 @@ void keypad(){
 		DS1307_write(YEAR, year);
 		DS1307_write(MIN_A, min_alarm);
 		DS1307_write(HOUR_A, hour_alarm);
-		delay(100);	
+		delay(200);	
 	}
 	if(1 <= adjust && adjust <= 3) dispHMS(0, 1);
 	else if(4 <= adjust && adjust <= 6) dispDMY(0, 1);
@@ -223,7 +223,7 @@ void main(){
 			if(hour == hour_alarm && min == min_alarm && sec < 10){
 				beep();
 			}
-			else if(min == 0 && sec == 0 && (cnt ==0 || cnt == 4)) beep();
+			else if(min == 0 && sec == 0 && (cnt == 0 || cnt == 4)) beep();
 			delay(20);
 		}
 	}
