@@ -58,7 +58,7 @@ void main(){
 		volt = (adc / 255.0) * 25000;
 		lcd_gotoxy(0, 1);
 		lcd_putint(volt);
-		lcd_putstring("V   ");
-		delay_ms(500);
+		lcd_putstring(" mV   ");
+		delay_ms(200);
 	}
  }
